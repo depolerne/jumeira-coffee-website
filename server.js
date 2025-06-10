@@ -1,52 +1,66 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const fs = require('fs');
 const path = require('path');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// In-memory хранилище отзывов (для Vercel serverless)
-let reviews = [
-    {
-        id: 1703894400000,
-        name: "Мария Иванова",
-        phone: "+7 (903) 456-78-90",
-        email: "maria@example.com", 
-        review: "Отличный кофе и уютная атмосфера! Всегда свежая выпечка и приветливый персонал. Рекомендую попробовать капучино с корицей.",
-        timestamp: "2023-12-29T18:00:00.000Z",
-        date: "29.12.2023",
-        hidden: false
-    },
-    {
-        id: 1703721600000,
-        name: "Алексей Смирнов",
-        phone: "+7 (915) 234-56-78",
-        email: "alex@example.com",
-        review: "Прекрасное место для работы с ноутбуком. Быстрый Wi-Fi, удобные столики и вкусный кофе. Часто прихожу сюда по утрам.",
-        timestamp: "2023-12-27T20:00:00.000Z",
-        date: "28.12.2023",
-        hidden: false
-    },
-    {
-        id: 1703635200000,
-        name: "Елена Петрова",
-        phone: "+7 (926) 789-01-23",
-        email: "elena@example.com",
-        review: "Замечательные десерты и ароматный кофе! Особенно понравился тирамису. Обслуживание на высоте, обязательно вернусь.",
-        timestamp: "2023-12-26T22:00:00.000Z",
-        date: "27.12.2023",
-        hidden: false
-    }
-];
+// Путь к файлу с отзывами
+const reviewsFile = path.join(__dirname, 'data', 'reviews.json');
+
+// Создаем папку data если её нет
+if (!fs.existsSync(path.dirname(reviewsFile))) {
+    fs.mkdirSync(path.dirname(reviewsFile), { recursive: true });
+}
+
+// Инициализируем файл отзывов если его нет
+if (!fs.existsSync(reviewsFile)) {
+    const initialReviews = [
+        {
+            id: 1703894400000,
+            name: "Мария Иванова",
+            phone: "+7 (903) 456-78-90",
+            email: "maria@example.com", 
+            review: "Отличный кофе и уютная атмосфера! Всегда свежая выпечка и приветливый персонал. Рекомендую попробовать капучино с корицей.",
+            timestamp: "2023-12-29T18:00:00.000Z",
+            date: "29.12.2023",
+            hidden: false
+        },
+        {
+            id: 1703721600000,
+            name: "Алексей Смирнов",
+            phone: "+7 (915) 234-56-78",
+            email: "alex@example.com",
+            review: "Прекрасное место для работы с ноутбуком. Быстрый Wi-Fi, удобные столики и вкусный кофе. Часто прихожу сюда по утрам.",
+            timestamp: "2023-12-27T20:00:00.000Z",
+            date: "28.12.2023",
+            hidden: false
+        },
+        {
+            id: 1703635200000,
+            name: "Елена Петрова",
+            phone: "+7 (926) 789-01-23",
+            email: "elena@example.com",
+            review: "Замечательные десерты и ароматный кофе! Особенно понравился тирамису. Обслуживание на высоте, обязательно вернусь.",
+            timestamp: "2023-12-26T22:00:00.000Z",
+            date: "27.12.2023",
+            hidden: false
+        }
+    ];
+    fs.writeFileSync(reviewsFile, JSON.stringify(initialReviews, null, 2));
+}
 
 // Получить все отзывы (только видимые)
 app.get('/api/reviews', (req, res) => {
     try {
+        const reviews = JSON.parse(fs.readFileSync(reviewsFile, 'utf8'));
         const visibleReviews = reviews.filter(review => !review.hidden);
         res.json(visibleReviews);
     } catch (error) {
@@ -69,6 +83,8 @@ app.post('/api/reviews', (req, res) => {
             return res.status(400).json({ error: 'Отзыв не может быть длиннее 500 символов' });
         }
         
+        const reviews = JSON.parse(fs.readFileSync(reviewsFile, 'utf8'));
+        
         const newReview = {
             id: Date.now(),
             name: name.trim(),
@@ -81,6 +97,7 @@ app.post('/api/reviews', (req, res) => {
         };
         
         reviews.push(newReview);
+        fs.writeFileSync(reviewsFile, JSON.stringify(reviews, null, 2));
         
         res.status(201).json({ message: 'Отзыв успешно добавлен', review: newReview });
     } catch (error) {
@@ -102,6 +119,7 @@ app.post('/api/admin/login', (req, res) => {
 // Получить все отзывы для админа (включая скрытые)
 app.get('/api/admin/reviews', (req, res) => {
     try {
+        const reviews = JSON.parse(fs.readFileSync(reviewsFile, 'utf8'));
         res.json(reviews);
     } catch (error) {
         console.error('Ошибка при чтении отзывов:', error);
@@ -115,6 +133,7 @@ app.put('/api/admin/reviews/:id', (req, res) => {
         const reviewId = parseInt(req.params.id);
         const updates = req.body;
         
+        const reviews = JSON.parse(fs.readFileSync(reviewsFile, 'utf8'));
         const reviewIndex = reviews.findIndex(r => r.id === reviewId);
         
         if (reviewIndex === -1) {
@@ -123,6 +142,8 @@ app.put('/api/admin/reviews/:id', (req, res) => {
         
         // Обновляем отзыв
         reviews[reviewIndex] = { ...reviews[reviewIndex], ...updates };
+        
+        fs.writeFileSync(reviewsFile, JSON.stringify(reviews, null, 2));
         
         res.json({ message: 'Отзыв обновлен', review: reviews[reviewIndex] });
     } catch (error) {
@@ -136,6 +157,7 @@ app.delete('/api/admin/reviews/:id', (req, res) => {
     try {
         const reviewId = parseInt(req.params.id);
         
+        const reviews = JSON.parse(fs.readFileSync(reviewsFile, 'utf8'));
         const reviewIndex = reviews.findIndex(r => r.id === reviewId);
         
         if (reviewIndex === -1) {
@@ -143,6 +165,7 @@ app.delete('/api/admin/reviews/:id', (req, res) => {
         }
         
         reviews.splice(reviewIndex, 1);
+        fs.writeFileSync(reviewsFile, JSON.stringify(reviews, null, 2));
         
         res.json({ message: 'Отзыв удален' });
     } catch (error) {
@@ -171,14 +194,10 @@ app.get('/admin.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Для локальной разработки
-if (require.main === module) {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`🚀 Сервер запущен на порту ${PORT}`);
-        console.log(`📝 Откройте http://localhost:${PORT} для просмотра сайта`);
-    });
-}
+app.listen(PORT, () => {
+    console.log(`🚀 Сервер запущен на порту ${PORT}`);
+    console.log(`📝 Откройте http://localhost:${PORT} для просмотра сайта`);
+});
 
 // Экспорт для Vercel
 module.exports = app; 
