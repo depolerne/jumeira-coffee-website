@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Jumeira Coffee - уютное кафе с лучшим кофе. Оставьте отзыв или зарегистрируйте бонусную карту">
+    <title>Jumeira Coffee - Кафе</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <!-- <div class="logo">
+                <img src="images/logo.jpg" alt="Jumeira Coffee" class="logo-img">
+                <h1 class="logo-text">Jumeira Coffee</h1>
+            </div> -->
+            <nav class="nav" >
+                <a href="https://www.instagram.com/jumeira_coffee/" target="_blank" class="nav-item nav-link">
+                    <i class="fab fa-instagram"></i>
+                    <span>@jumeira_coffee</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h2 class="hero-title">Добро пожаловать в<br><span class="accent">Jumeira Coffee</span></h2>
+                <p class="hero-subtitle">Место, где каждая чашка кофе - это история, а каждый гость - часть нашей семьи</p>
+                
+                <div class="hero-actions">
+                    <button class="btn btn-primary" id="reviewBtn">
+                        <i class="fas fa-star"></i>
+                        Оставить отзыв
+                    </button>
+                  
+                    <button class="btn btn-secondary" id="bonusBtn">
+                        <i class="fas fa-gift"></i>
+                        Бонусная карта
+                    </button>
+                    <a href="/reviews.html" class="btn btn-outline">
+                        <i class="fas fa-comments"></i>
+                        Читать отзывы
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-coffee"></i>
+                    </div>
+                    <h3>Премиум кофе</h3>
+                    <p>Только лучшие зерна арабики, обжаренные с любовью</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Уютная атмосфера</h3>
+                    <p>Теплое место для встреч с друзьями и работы</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3>Свежая еда</h3>
+                    <p>Вкусная еда и десерты каждый день</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal для отзывов -->
+    <div class="modal" id="reviewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Поделитесь впечатлениями</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form class="review-form" id="reviewForm">
+                <div class="form-group">
+                    <label for="name">Ваше имя *</label>
+                    <input type="text" id="name" name="name" required maxlength="50">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Номер телефона</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="example@mail.ru">
+                </div>
+                
+                <div class="form-group">
+                    <label for="review">Ваш отзыв *</label>
+                    <textarea id="review" name="review" required maxlength="500" rows="5" 
+                              placeholder="Расскажите о своем опыте посещения нашего кафе..."></textarea>
+                    <div class="char-counter">
+                        <span id="charCount">0</span>/500
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="cancelBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span class="btn-text">Отправить отзыв</span>
+                        <div class="loading-spinner" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+        <div class="success-content">
+            <i class="fas fa-check-circle"></i>
+            <h3>Спасибо за отзыв!</h3>
+            <p>Ваше мнение очень важно для нас</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="images/logo.jpg" alt="Jumeira Coffee" class="footer-logo-img">
+                    <span>Jumeira Coffee</span>
+                </div>
+                <div class="footer-text">
+                    <p>&copy; 2024 Jumeira Coffee. Все права защищены.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html> 

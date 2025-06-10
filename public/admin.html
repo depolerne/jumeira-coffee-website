@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель - Jumeira Coffee</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        
+        .admin-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .reviews-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .review-card {
+            background: white;
+            border-radius: var(--radius-medium);
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+            border-left: 4px solid var(--coffee-medium);
+            transition: transform 0.3s ease;
+        }
+        
+        .review-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .reviewer-info h4 {
+            color: var(--coffee-dark);
+            margin-bottom: 5px;
+            font-family: var(--font-heading);
+        }
+        
+        .reviewer-details {
+            font-size: 14px;
+            color: var(--gray-medium);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        
+        .review-date {
+            font-size: 12px;
+            color: var(--gray-medium);
+            background: var(--gray-light);
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+        
+        .review-text {
+            color: var(--black);
+            line-height: 1.6;
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--gray-light);
+            border-radius: var(--radius-small);
+            font-style: italic;
+        }
+        
+        .review-text::before {
+            content: '"';
+            font-size: 24px;
+            color: var(--coffee-medium);
+            font-weight: bold;
+        }
+        
+        .review-text::after {
+            content: '"';
+            font-size: 24px;
+            color: var(--coffee-medium);
+            font-weight: bold;
+        }
+        
+        .no-reviews {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-medium);
+        }
+        
+        .no-reviews i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--coffee-light);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-medium);
+            text-align: center;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--coffee-medium);
+        }
+        
+        .stat-label {
+            color: var(--gray-medium);
+            margin-top: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-medium);
+        }
+        
+        .loading i {
+            font-size: 32px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .export-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--coffee-medium);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            background: var(--coffee-dark);
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 768px) {
+            .review-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .export-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+  
+
+    <div class="admin-container">
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalReviews">-</div>
+                <div class="stat-label">Всего отзывов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayReviews">-</div>
+                <div class="stat-label">Сегодня</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="weekReviews">-</div>
+                <div class="stat-label">За неделю</div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Загрузка отзывов...</p>
+        </div>
+
+        <div class="reviews-grid" id="reviewsGrid" style="display: none;">
+            <!-- Отзывы будут загружены здесь -->
+        </div>
+
+        <div class="no-reviews" id="noReviews" style="display: none;">
+            <i class="fas fa-comment-slash"></i>
+            <h3>Отзывов пока нет</h3>
+            <p>Когда клиенты оставят отзывы, они появятся здесь</p>
+        </div>
+    </div>
+
+    <button class="export-btn" id="exportBtn" title="Экспорт в CSV">
+        <i class="fas fa-download"></i>
+    </button>
+
+    <script>
+        class AdminPanel {
+            constructor() {
+                this.reviews = [];
+                this.init();
+            }
+
+            async init() {
+                await this.loadReviews();
+                this.bindEvents();
+            }
+
+            async loadReviews() {
+                try {
+                    const response = await fetch('/api/reviews');
+                    this.reviews = await response.json();
+                    this.renderReviews();
+                    this.updateStats();
+                } catch (error) {
+                    console.error('Ошибка загрузки отзывов:', error);
+                    this.showError('Ошибка загрузки отзывов');
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                }
+            }
+
+            renderReviews() {
+                const grid = document.getElementById('reviewsGrid');
+                const noReviews = document.getElementById('noReviews');
+
+                if (this.reviews.length === 0) {
+                    noReviews.style.display = 'block';
+                    return;
+                }
+
+                grid.style.display = 'grid';
+                
+                // Сортируем отзывы по дате (новые сначала)
+                const sortedReviews = [...this.reviews].sort((a, b) => 
+                    new Date(b.timestamp) - new Date(a.timestamp)
+                );
+
+                grid.innerHTML = sortedReviews.map(review => `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <h4>${this.escapeHtml(review.name)}</h4>
+                                <div class="reviewer-details">
+                                    ${review.phone ? `<span><i class="fas fa-phone"></i> ${this.escapeHtml(review.phone)}</span>` : ''}
+                                    ${review.email ? `<span><i class="fas fa-envelope"></i> ${this.escapeHtml(review.email)}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="review-date">
+                                <i class="fas fa-calendar"></i>
+                                ${review.date}
+                            </div>
+                        </div>
+                        <div class="review-text">
+                            ${this.escapeHtml(review.review)}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateStats() {
+                const total = this.reviews.length;
+                const today = new Date().toLocaleDateString('ru-RU');
+                const todayCount = this.reviews.filter(r => r.date === today).length;
+                
+                // Отзывы за последние 7 дней
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                const weekCount = this.reviews.filter(r => 
+                    new Date(r.timestamp) >= weekAgo
+                ).length;
+
+                document.getElementById('totalReviews').textContent = total;
+                document.getElementById('todayReviews').textContent = todayCount;
+                document.getElementById('weekReviews').textContent = weekCount;
+            }
+
+            bindEvents() {
+                document.getElementById('exportBtn').addEventListener('click', () => {
+                    this.exportToCSV();
+                });
+            }
+
+            exportToCSV() {
+                if (this.reviews.length === 0) {
+                    alert('Нет отзывов для экспорта');
+                    return;
+                }
+
+                const headers = ['Дата', 'Имя', 'Телефон', 'Email', 'Отзыв'];
+                const csvContent = [
+                    headers.join(','),
+                    ...this.reviews.map(review => [
+                        review.date,
+                        `"${review.name}"`,
+                        `"${review.phone || ''}"`,
+                        `"${review.email || ''}"`,
+                        `"${review.review.replace(/"/g, '""')}"`
+                    ].join(','))
+                ].join('\n');
+
+                const blob = new Blob(['\ufeff' + csvContent], { 
+                    type: 'text/csv;charset=utf-8;' 
+                });
+                
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `reviews_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            showError(message) {
+                const loading = document.getElementById('loading');
+                loading.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>${message}</p>
+                `;
+            }
+        }
+
+        // Инициализация админ панели
+        document.addEventListener('DOMContentLoaded', () => {
+            new AdminPanel();
+        });
+    </script>
+</body>
+</html> 

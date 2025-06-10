@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель - Управление отзывами | Jumeira Coffee</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .login-form {
+            background: var(--white);
+            padding: 50px 40px;
+            border-radius: var(--radius-large);
+            text-align: center;
+            box-shadow: var(--shadow-dark);
+            min-width: 350px;
+        }
+        
+        .login-form h2 {
+            font-family: var(--font-heading);
+            color: var(--coffee-dark);
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .login-form p {
+            color: var(--gray-medium);
+            margin-bottom: 30px;
+        }
+        
+        .password-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-small);
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .password-input:focus {
+            outline: none;
+            border-color: var(--coffee-medium);
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        }
+        
+        .login-error {
+            color: var(--error);
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: var(--white);
+            padding: 20px 0;
+            text-align: center;
+        }
+        
+        .admin-content {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .admin-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .reviews-count {
+            color: var(--gray-medium);
+            font-size: 16px;
+        }
+        
+        .review-admin-card {
+            background: var(--white);
+            border-radius: var(--radius-medium);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-light);
+            border-left: 5px solid var(--coffee-medium);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .review-admin-card.hidden {
+            opacity: 0.6;
+            border-left-color: var(--gray-medium);
+            background: #f9f9f9;
+        }
+        
+        .review-admin-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .review-admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .review-admin-info h4 {
+            color: var(--coffee-dark);
+            margin-bottom: 5px;
+            font-family: var(--font-heading);
+        }
+        
+        .review-admin-details {
+            font-size: 14px;
+            color: var(--gray-medium);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        
+        .review-admin-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: var(--radius-small);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .action-btn.edit {
+            background: #007bff;
+            color: white;
+        }
+        
+        .action-btn.edit:hover {
+            background: #0056b3;
+        }
+        
+        .action-btn.hide {
+            background: #ffc107;
+            color: var(--black);
+        }
+        
+        .action-btn.hide:hover {
+            background: #e0a800;
+        }
+        
+        .action-btn.show {
+            background: #28a745;
+            color: white;
+        }
+        
+        .action-btn.show:hover {
+            background: #1e7e34;
+        }
+        
+        .action-btn.delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .action-btn.delete:hover {
+            background: #c82333;
+        }
+        
+        .review-admin-text {
+            background: var(--gray-light);
+            padding: 15px;
+            border-radius: var(--radius-small);
+            margin: 15px 0;
+            font-style: italic;
+            line-height: 1.6;
+            border-left: 3px solid var(--coffee-light);
+        }
+        
+        .review-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .review-status.visible {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .review-status.hidden {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .edit-form {
+            display: none;
+            background: var(--cream);
+            padding: 20px;
+            border-radius: var(--radius-small);
+            margin-top: 15px;
+        }
+        
+        .edit-form.show {
+            display: block;
+        }
+        
+        .edit-form textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-small);
+            font-family: var(--font-body);
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        
+        .edit-form textarea:focus {
+            outline: none;
+            border-color: var(--coffee-medium);
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        }
+        
+        .edit-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .loading-admin {
+            text-align: center;
+            padding: 60px;
+            color: var(--gray-medium);
+        }
+        
+        .loading-admin i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+            color: var(--coffee-medium);
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .confirmation-modal.show {
+            display: flex;
+        }
+        
+        .confirmation-content {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--radius-large);
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+        }
+        
+        .confirmation-content h3 {
+            color: var(--coffee-dark);
+            margin-bottom: 15px;
+            font-family: var(--font-heading);
+        }
+        
+        .confirmation-content p {
+            color: var(--gray-medium);
+            margin-bottom: 25px;
+        }
+        
+        .confirmation-actions {
+            display: flex;
+                gap: 15px;
+                justify-content: center;
+        }
+        
+        @media (max-width: 768px) {
+            .login-form {
+                margin: 20px;
+                min-width: auto;
+            }
+            
+            .admin-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .review-admin-header {
+                flex-direction: column;
+            }
+            
+            .review-admin-actions {
+                justify-content: flex-start;
+            }
+            
+            .confirmation-actions {
+                /* flex-direction: column; */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-form">
+            <h2><i class="fas fa-shield-alt"></i> Вход в админ панель</h2>
+            <p>Введите пароль для доступа к управлению отзывами</p>
+            <form id="loginForm">
+                <div class="password-group">
+                    <input type="password" id="passwordInput" class="password-input" 
+                           placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <span class="btn-text">Войти</span>
+                    <div class="loading-spinner" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </button>
+                <div class="login-error" id="loginError">
+                    Неверный пароль. Попробуйте еще раз.
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Content -->
+    <div class="admin-screen" id="adminScreen" style="display: none;">
+      
+
+        <div class="admin-content">
+            <div class="admin-actions">
+                <div class="reviews-count" id="reviewsCount">
+                    Загрузка отзывов...
+                </div>
+              
+            </div>
+
+            <div class="loading-admin" id="loadingAdmin">
+                <i class="fas fa-spinner"></i>
+                <h3>Загружаем отзывы...</h3>
+                <p>Пожалуйста, подождите</p>
+            </div>
+
+            <div class="reviews-admin-grid" id="reviewsAdminGrid">
+                <!-- Отзывы будут загружены здесь -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="confirmation-modal" id="confirmationModal">
+        <div class="confirmation-content">
+            <h3 id="confirmationTitle">Подтвердите действие</h3>
+            <p id="confirmationMessage">Вы уверены?</p>
+            <div class="confirmation-actions">
+                <button class="btn btn-outline" id="cancelAction">Отмена</button>
+                <button class="btn btn-primary" id="confirmAction">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ReviewsAdminPanel {
+            constructor() {
+                this.reviews = [];
+                this.isAuthenticated = false;
+                this.pendingAction = null;
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.checkAuthentication();
+            }
+
+            bindEvents() {
+                // Login form
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    this.handleLogin(e);
+                });
+
+                // Confirmation modal
+                document.getElementById('cancelAction').addEventListener('click', () => {
+                    this.hideConfirmationModal();
+                });
+
+                document.getElementById('confirmAction').addEventListener('click', () => {
+                    this.executeAction();
+                });
+            }
+
+            checkAuthentication() {
+                const token = localStorage.getItem('admin-token');
+                if (token === 'admin-authenticated') {
+                    this.isAuthenticated = true;
+                    this.showAdminPanel();
+                    this.loadReviews();
+                }
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                const password = document.getElementById('passwordInput').value;
+                const loginBtn = document.getElementById('loginBtn');
+                const loginError = document.getElementById('loginError');
+                
+                // Show loading
+                loginBtn.classList.add('loading');
+                loginError.style.display = 'none';
+                
+                try {
+                    const response = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ password })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        localStorage.setItem('admin-token', result.token);
+                        this.isAuthenticated = true;
+                        this.showAdminPanel();
+                        this.loadReviews();
+                    } else {
+                        loginError.style.display = 'block';
+                        document.getElementById('passwordInput').value = '';
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    loginError.style.display = 'block';
+                } finally {
+                    loginBtn.classList.remove('loading');
+                }
+            }
+
+            showAdminPanel() {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminScreen').style.display = 'block';
+            }
+
+            async loadReviews() {
+                try {
+                    const response = await fetch('/api/admin/reviews');
+                    this.reviews = await response.json();
+                    this.renderReviews();
+                    this.updateCount();
+                } catch (error) {
+                    console.error('Error loading reviews:', error);
+                } finally {
+                    document.getElementById('loadingAdmin').style.display = 'none';
+                }
+            }
+
+            renderReviews() {
+                const grid = document.getElementById('reviewsAdminGrid');
+                
+                if (this.reviews.length === 0) {
+                    grid.innerHTML = '<div class="no-reviews"><h3>Отзывов пока нет</h3></div>';
+                    return;
+                }
+
+                // Сортируем отзывы по дате (новые сначала)
+                const sortedReviews = [...this.reviews].sort((a, b) => 
+                    new Date(b.timestamp) - new Date(a.timestamp)
+                );
+
+                grid.innerHTML = sortedReviews.map(review => `
+                    <div class="review-admin-card ${review.hidden ? 'hidden' : ''}" data-id="${review.id}">
+                        <div class="review-status ${review.hidden ? 'hidden' : 'visible'}">
+                            ${review.hidden ? 'Скрыт' : 'Виден'}
+                        </div>
+                        
+                        <div class="review-admin-header">
+                            <div class="review-admin-info">
+                                <h4>${this.escapeHtml(review.name)}</h4>
+                                <div class="review-admin-details">
+                                    ${review.phone ? `<span><i class="fas fa-phone"></i> ${this.escapeHtml(review.phone)}</span>` : ''}
+                                    ${review.email ? `<span><i class="fas fa-envelope"></i> ${this.escapeHtml(review.email)}</span>` : ''}
+                                    <span><i class="fas fa-calendar"></i> ${review.date}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="review-admin-actions">
+                                <button class="action-btn edit" onclick="reviewsAdmin.toggleEdit(${review.id})">
+                                    <i class="fas fa-edit"></i> Редактировать
+                                </button>
+                                <button class="action-btn ${review.hidden ? 'show' : 'hide'}" 
+                                        onclick="reviewsAdmin.toggleVisibility(${review.id})">
+                                    <i class="fas fa-${review.hidden ? 'eye' : 'eye-slash'}"></i> 
+                                    ${review.hidden ? 'Показать' : 'Скрыть'}
+                                </button>
+                                <button class="action-btn delete" onclick="reviewsAdmin.deleteReview(${review.id})">
+                                    <i class="fas fa-trash"></i> Удалить
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="review-admin-text" id="text-${review.id}">
+                            ${this.escapeHtml(review.review)}
+                        </div>
+                        
+                        <div class="edit-form" id="edit-${review.id}">
+                            <textarea id="textarea-${review.id}">${this.escapeHtml(review.review)}</textarea>
+                            <div class="edit-actions">
+                                <button class="btn btn-primary" onclick="reviewsAdmin.saveEdit(${review.id})">
+                                    Сохранить
+                                </button>
+                                <button class="btn btn-outline" onclick="reviewsAdmin.cancelEdit(${review.id})">
+                                    Отмена
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateCount() {
+                const total = this.reviews.length;
+                const visible = this.reviews.filter(r => !r.hidden).length;
+                const hidden = total - visible;
+                
+                document.getElementById('reviewsCount').innerHTML = `
+                    Всего отзывов: <strong>${total}</strong> | 
+                    Видимых: <strong>${visible}</strong> | 
+                    Скрытых: <strong>${hidden}</strong>
+                `;
+            }
+
+            toggleEdit(reviewId) {
+                const textDiv = document.getElementById(`text-${reviewId}`);
+                const editForm = document.getElementById(`edit-${reviewId}`);
+                
+                if (editForm.classList.contains('show')) {
+                    this.cancelEdit(reviewId);
+                } else {
+                    textDiv.style.display = 'none';
+                    editForm.classList.add('show');
+                }
+            }
+
+            cancelEdit(reviewId) {
+                const textDiv = document.getElementById(`text-${reviewId}`);
+                const editForm = document.getElementById(`edit-${reviewId}`);
+                const textarea = document.getElementById(`textarea-${reviewId}`);
+                
+                // Restore original text
+                const review = this.reviews.find(r => r.id === reviewId);
+                textarea.value = review.review;
+                
+                textDiv.style.display = 'block';
+                editForm.classList.remove('show');
+            }
+
+            async saveEdit(reviewId) {
+                const textarea = document.getElementById(`textarea-${reviewId}`);
+                const newText = textarea.value.trim();
+                
+                if (!newText) {
+                    alert('Отзыв не может быть пустым');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/admin/reviews/${reviewId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ review: newText })
+                    });
+
+                    if (response.ok) {
+                        // Update local data
+                        const review = this.reviews.find(r => r.id === reviewId);
+                        review.review = newText;
+                        
+                        // Update UI
+                        document.getElementById(`text-${reviewId}`).textContent = newText;
+                        this.cancelEdit(reviewId);
+                        
+                        this.showNotification('Отзыв обновлен', 'success');
+                    } else {
+                        throw new Error('Failed to update review');
+                    }
+                } catch (error) {
+                    console.error('Error updating review:', error);
+                    this.showNotification('Ошибка при обновлении отзыва', 'error');
+                }
+            }
+
+            toggleVisibility(reviewId) {
+                const review = this.reviews.find(r => r.id === reviewId);
+                const action = review.hidden ? 'показать' : 'скрыть';
+                
+                this.showConfirmationModal(
+                    `Изменить видимость отзыва`,
+                    `Вы уверены, что хотите ${action} этот отзыв?`,
+                    async () => {
+                        try {
+                            const response = await fetch(`/api/admin/reviews/${reviewId}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ hidden: !review.hidden })
+                            });
+
+                            if (response.ok) {
+                                review.hidden = !review.hidden;
+                                this.renderReviews();
+                                this.updateCount();
+                                this.showNotification(`Отзыв ${review.hidden ? 'скрыт' : 'показан'}`, 'success');
+                            } else {
+                                throw new Error('Failed to update visibility');
+                            }
+                        } catch (error) {
+                            console.error('Error updating visibility:', error);
+                            this.showNotification('Ошибка при изменении видимости', 'error');
+                        }
+                    }
+                );
+            }
+
+            deleteReview(reviewId) {
+                this.showConfirmationModal(
+                    'Удалить отзыв',
+                    'Вы уверены, что хотите удалить этот отзыв? Это действие нельзя отменить.',
+                    async () => {
+                        try {
+                            const response = await fetch(`/api/admin/reviews/${reviewId}`, {
+                                method: 'DELETE'
+                            });
+
+                            if (response.ok) {
+                                this.reviews = this.reviews.filter(r => r.id !== reviewId);
+                                this.renderReviews();
+                                this.updateCount();
+                                this.showNotification('Отзыв удален', 'success');
+                            } else {
+                                throw new Error('Failed to delete review');
+                            }
+                        } catch (error) {
+                            console.error('Error deleting review:', error);
+                            this.showNotification('Ошибка при удалении отзыва', 'error');
+                        }
+                    }
+                );
+            }
+
+            showConfirmationModal(title, message, action) {
+                document.getElementById('confirmationTitle').textContent = title;
+                document.getElementById('confirmationMessage').textContent = message;
+                document.getElementById('confirmationModal').classList.add('show');
+                this.pendingAction = action;
+            }
+
+            hideConfirmationModal() {
+                document.getElementById('confirmationModal').classList.remove('show');
+                this.pendingAction = null;
+            }
+
+            async executeAction() {
+                if (this.pendingAction) {
+                    await this.pendingAction();
+                    this.hideConfirmationModal();
+                }
+            }
+
+            showNotification(message, type) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.classList.add('show'), 100);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => document.body.removeChild(notification), 300);
+                }, 3000);
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize admin panel
+        const reviewsAdmin = new ReviewsAdminPanel();
+    </script>
+</body>
+</html> 
