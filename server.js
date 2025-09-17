@@ -172,6 +172,35 @@ app.get('/admin.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// Обслуживание статических файлов с правильными MIME типами
+app.get('/css/:file', (req, res) => {
+    res.setHeader('Content-Type', 'text/css');
+    res.sendFile(path.join(__dirname, 'public', 'css', req.params.file));
+});
+
+app.get('/js/:file', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'public', 'js', req.params.file));
+});
+
+app.get('/images/:file', (req, res) => {
+    const ext = path.extname(req.params.file).toLowerCase();
+    if (ext === '.jpg' || ext === '.jpeg') {
+        res.setHeader('Content-Type', 'image/jpeg');
+    } else if (ext === '.png') {
+        res.setHeader('Content-Type', 'image/png');
+    } else if (ext === '.gif') {
+        res.setHeader('Content-Type', 'image/gif');
+    } else if (ext === '.svg') {
+        res.setHeader('Content-Type', 'image/svg+xml');
+    }
+    res.sendFile(path.join(__dirname, 'public', 'images', req.params.file));
+});
+
+app.get('/favicon.ico', (req, res) => {
+    res.status(404).send('Not found');
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
     console.log(`📝 Откройте http://localhost:${PORT} для просмотра сайта`);
