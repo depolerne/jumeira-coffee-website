@@ -34,10 +34,7 @@ class Utils {
         return value;
     }
     
-    static validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    }
+
     
     static debounce(func, wait) {
         let timeout;
@@ -182,10 +179,7 @@ class ReviewForm {
             return false;
         }
         
-        if (field.type === 'email' && value && !Utils.validateEmail(value)) {
-            this.showFieldError(field, 'Введите корректный email адрес');
-            return false;
-        }
+
         
         if (field.name === 'review' && value.length > 500) {
             this.showFieldError(field, 'Отзыв не может быть длиннее 500 символов');
@@ -239,7 +233,6 @@ class ReviewForm {
             const data = {
                 name: formData.get('name').trim(),
                 phone: formData.get('phone').trim(),
-                email: formData.get('email').trim(),
                 review: formData.get('review').trim()
             };
             
@@ -482,4 +475,4 @@ window.JumeiraCoffee = {
     Utils,
     Modal,
     ReviewForm
-}; 
+};

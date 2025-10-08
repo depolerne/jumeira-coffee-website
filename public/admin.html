@@ -276,7 +276,6 @@
                                 <h4>${this.escapeHtml(review.name)}</h4>
                                 <div class="reviewer-details">
                                     ${review.phone ? `<span><i class="fas fa-phone"></i> ${this.escapeHtml(review.phone)}</span>` : ''}
-                                    ${review.email ? `<span><i class="fas fa-envelope"></i> ${this.escapeHtml(review.email)}</span>` : ''}
                                 </div>
                             </div>
                             <div class="review-date">
@@ -320,14 +319,13 @@
                     return;
                 }
 
-                const headers = ['Дата', 'Имя', 'Телефон', 'Email', 'Отзыв'];
+                const headers = ['Дата', 'Имя', 'Телефон', 'Отзыв'];
                 const csvContent = [
                     headers.join(','),
                     ...this.reviews.map(review => [
                         review.date,
                         `"${review.name}"`,
                         `"${review.phone || ''}"`,
-                        `"${review.email || ''}"`,
                         `"${review.review.replace(/"/g, '""')}"`
                     ].join(','))
                 ].join('\n');
@@ -367,4 +365,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
